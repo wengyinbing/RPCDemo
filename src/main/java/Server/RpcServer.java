@@ -12,9 +12,12 @@ import java.util.concurrent.*;
 public class RpcServer {
 
     private final ExecutorService threadPool;
+    private final ServiceRegistry serviceRegistry;
+    private RequestHandler requestHandler = new RequestHandler();
     private static final Logger logger = LoggerFactory.getLogger(RpcServer.class);
 
-    public RpcServer() {
+    public RpcServer(ServiceRegistry serviceRegistry) {
+        this.serviceRegistry = serviceRegistry;
         int corePoolSize = 5;
         int maximumPoolSize = 50;
         long keepAliveTime = 60;
@@ -34,6 +37,19 @@ public class RpcServer {
             }
         } catch (IOException e) {
             logger.error("连接时有错误发生：", e);
+        }
+    }
+    public void start(int port) {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            logger.info("服务器启动……");
+            Socket socket;
+            while((socket = serverSocket.accept()) != null) {
+                logger.info("消费者连接: {}:{}", socket.getInetAddress(), socket.getPort());
+                threadPool.execute(new RequestHandlerThread(socket, requestHandler, serviceRegistry));
+            }
+            threadPool.shutdown();
+        } catch (IOException e) {
+            logger.error("服务器启动时有错误发生:", e);
         }
     }
 
