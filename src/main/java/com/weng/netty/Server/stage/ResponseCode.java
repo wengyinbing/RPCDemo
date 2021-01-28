@@ -1,0 +1,25 @@
+package com.weng.netty.Server.stage;
+
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+/**
+ * @author wengyinbing
+ * @data 2021/1/21 16:02
+ **/
+@AllArgsConstructor
+@Getter
+public enum ResponseCode {
+
+    SUCCESS(200,"调用方法成功"),
+    FAIL(500,"调用方法失败"),
+    NOT_FOUND_METHOD(500,"未找到指定方法"),
+    NOT_FOUND_CLASS(500,"未找到指定类"),
+    METHOD_NOT_FOUND(500,"未找到指定方法");
+
+
+    private Integer code;
+    private String message;
+
+}
