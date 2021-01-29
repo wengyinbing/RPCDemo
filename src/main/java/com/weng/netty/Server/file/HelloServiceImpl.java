@@ -1,5 +1,6 @@
 package com.weng.netty.Server.file;
 
+import com.weng.netty.Server.annotation.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
  * @author wengyinbing
  * @data 2021/1/21 15:31
  **/
+@Service
 public class HelloServiceImpl implements HelloService {
     private static final Logger logger = LoggerFactory.getLogger(HelloServiceImpl.class);
     @Override

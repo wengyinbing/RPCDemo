@@ -12,4 +12,5 @@ public interface RpcServer {
     void start();
 
     <T> void publishService(Object service, Class<T> serviceClass) throws RpcException;
+    <T> void publishService(T service, String serviceName);
 }

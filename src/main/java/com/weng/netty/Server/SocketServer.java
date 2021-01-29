@@ -63,7 +63,12 @@ public class SocketServer implements RpcServer {
             start();
         }
 
-        @Override
+    @Override
+    public <T> void publishService(T service, String serviceName) {
+
+    }
+
+    @Override
         public void start() {
             try (ServerSocket serverSocket = new ServerSocket(port)) {
                 logger.info("服务器启动……");
