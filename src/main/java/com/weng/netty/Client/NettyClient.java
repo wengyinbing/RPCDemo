@@ -1,6 +1,10 @@
 package com.weng.netty.Client;
 
+import com.weng.netty.Server.NacosServiceDiscovery;
 import com.weng.netty.Server.NacosServiceRegistry;
+import com.weng.netty.Server.ServiceDiscovery;
+import com.weng.netty.Server.loadbalancer.LoadBalancer;
+import com.weng.netty.Server.loadbalancer.RandomLoadBalancer;
 import com.weng.netty.Server.stage.RpcResponse;
 import com.weng.netty.Server.ServiceRegistry;
 import com.weng.netty.Server.netty_item.*;
@@ -28,14 +32,75 @@ import java.util.concurrent.atomic.AtomicReference;
 public class NettyClient implements RpcClient {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyClient.class);
-    private final ServiceRegistry serviceRegistry;
+    //private final ServiceRegistry serviceRegistry;
     private static final Bootstrap bootstrap;
-    private CommonSerializer serializer;
+    private final CommonSerializer serializer;
+    private final ServiceDiscovery serviceDiscovery;
+
+    /*public NettyClient() {
+        this.serviceRegistry = new NacosServiceRegistry();
+    }*/
 
     public NettyClient() {
-        this.serviceRegistry = new NacosServiceRegistry();
+        this(0, new RandomLoadBalancer());
     }
-    /*private String host;
+    public NettyClient(LoadBalancer loadBalancer) {
+        this(0, loadBalancer);
+    }
+    public NettyClient(Integer serializer) {
+        this(serializer, new RandomLoadBalancer());
+    }
+    public NettyClient(Integer serializer, LoadBalancer loadBalancer) {
+        this.serviceDiscovery = new NacosServiceDiscovery(loadBalancer);
+        this.serializer = CommonSerializer.getByCode(serializer);
+        //this.unprocessedRequests = SingletonFactory.getInstance(UnprocessedRequests.class);
+    }
+
+    static {
+       EventLoopGroup group = new NioEventLoopGroup();
+       bootstrap = new Bootstrap();
+       bootstrap.group(group)
+               .channel(NioSocketChannel.class)
+               .option(ChannelOption.SO_KEEPALIVE, true);
+   }
+    @Override
+    public Object sendRequest(RpcRequest rpcRequest) throws RpcException {
+        if(serializer == null) {
+            logger.error("未设置序列化器");
+            throw new RpcException(RpcError.SERIALIZER_NOT_FOUND);
+        }
+        AtomicReference<Object> result = new AtomicReference<>(null);
+        try {
+            //Channel channel = ChannelProvider.get(new InetSocketAddress(host, port), serializer);
+            //InetSocketAddress inetSocketAddress = serviceRegistry.lookupService(rpcRequest.getInterfaceName());
+            InetSocketAddress inetSocketAddress = serviceDiscovery.lookupService(rpcRequest.getInterfaceName());
+            Channel channel = ChannelProvider.get(inetSocketAddress, serializer);
+            if(channel.isActive()) {
+                channel.writeAndFlush(rpcRequest).addListener(future1 -> {
+                    if (future1.isSuccess()) {
+                        logger.info(String.format("客户端发送消息: %s", rpcRequest.toString()));
+                    } else {
+                        logger.error("发送消息时有错误发生: ", future1.cause());
+                    }
+                });
+                channel.closeFuture().sync();
+                AttributeKey<RpcResponse> key = AttributeKey.valueOf("rpcResponse" + rpcRequest.getRequestId());
+                RpcResponse rpcResponse = channel.attr(key).get();
+                RpcMessageChecker.check(rpcRequest, rpcResponse);
+                result.set(rpcResponse.getData());
+            } else {
+                System.exit(0);
+            }
+        } catch (InterruptedException e) {
+            logger.error("发送消息时有错误发生: ", e);
+        }
+        return result.get();
+    }
+    //@Override
+    //public void setSerializer(CommonSerializer serializer) {
+        //this.serializer = serializer;
+   // }
+     /*private String host;
     private int port;
     private static final Bootstrap bootstrap;
 
@@ -62,49 +127,6 @@ public class NettyClient implements RpcClient {
                     }
                 });
     }*/
-   static {
-       EventLoopGroup group = new NioEventLoopGroup();
-       bootstrap = new Bootstrap();
-       bootstrap.group(group)
-               .channel(NioSocketChannel.class)
-               .option(ChannelOption.SO_KEEPALIVE, true);
-   }
-    @Override
-    public Object sendRequest(RpcRequest rpcRequest) throws RpcException {
-        if(serializer == null) {
-            logger.error("未设置序列化器");
-            throw new RpcException(RpcError.SERIALIZER_NOT_FOUND);
-        }
-        AtomicReference<Object> result = new AtomicReference<>(null);
-        try {
-            //Channel channel = ChannelProvider.get(new InetSocketAddress(host, port), serializer);
-            InetSocketAddress inetSocketAddress = serviceRegistry.lookupService(rpcRequest.getInterfaceName());
-            Channel channel = ChannelProvider.get(inetSocketAddress, serializer);
-            if(channel.isActive()) {
-                channel.writeAndFlush(rpcRequest).addListener(future1 -> {
-                    if (future1.isSuccess()) {
-                        logger.info(String.format("客户端发送消息: %s", rpcRequest.toString()));
-                    } else {
-                        logger.error("发送消息时有错误发生: ", future1.cause());
-                    }
-                });
-                channel.closeFuture().sync();
-                AttributeKey<RpcResponse> key = AttributeKey.valueOf("rpcResponse" + rpcRequest.getRequestId());
-                RpcResponse rpcResponse = channel.attr(key).get();
-                RpcMessageChecker.check(rpcRequest, rpcResponse);
-                result.set(rpcResponse.getData());
-            } else {
-                System.exit(0);
-            }
-        } catch (InterruptedException e) {
-            logger.error("发送消息时有错误发生: ", e);
-        }
-        return result.get();
-    }
-    //@Override
-    public void setSerializer(CommonSerializer serializer) {
-        this.serializer = serializer;
-    }
     /*@Override
     public Object sendRequest(RpcRequest rpcRequest) {
         try {

@@ -2,6 +2,7 @@ package com.weng.netty.Server;
 
 
 
+import com.weng.netty.Server.hook.ShutdownHook;
 import com.weng.netty.Server.netty_item.*;
 import com.weng.netty.Server.stage.RpcError;
 import com.weng.netty.Server.stage.RpcException;
@@ -72,6 +73,7 @@ public class NettyServer implements RpcServer {
                     });
             //ChannelFuture future = serverBootstrap.bind(port).sync();
             ChannelFuture future = serverBootstrap.bind(host, port).sync();
+            ShutdownHook.getShutdownHook().addClearAllHook();
             future.channel().closeFuture().sync();
 
         } catch (InterruptedException e) {
