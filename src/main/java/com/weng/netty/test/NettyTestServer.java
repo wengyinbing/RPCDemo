@@ -13,7 +13,7 @@ import com.weng.netty.Server.stage.RpcException;
  * @author wengyinbing
  * @data 2021/1/26 23:31
  **/
-@ServiceScan
+//@ServiceScan
 public class NettyTestServer {
     public static void main(String[] args) throws RpcException {
         HelloService helloService = new HelloServiceImpl();
@@ -22,7 +22,7 @@ public class NettyTestServer {
         server.setSerializer(new ProtobufSerializer());
         //server.start(9999);
         server.publishService(helloService, HelloService.class);
-       /* RpcServer server = new NettyServer("127.0.0.1", 9999, 2);
+       /*RpcServer server = new NettyServer("127.0.0.1", 9999, 2);
         server.start();*/
     }
 }

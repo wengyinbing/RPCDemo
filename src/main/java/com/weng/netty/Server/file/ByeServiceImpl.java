@@ -6,7 +6,7 @@ import com.weng.netty.Server.annotation.Service;
  * @author wengyinbing
  * @data 2021/1/29 21:05
  **/
-@Service
+//@Service
 public class ByeServiceImpl implements ByeService {
 
     @Override

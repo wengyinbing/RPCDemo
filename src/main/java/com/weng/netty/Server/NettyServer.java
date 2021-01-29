@@ -24,10 +24,10 @@ import java.util.concurrent.TimeUnit;
  * @author wengyinbing
  * @data 2021/1/26 23:24
  **/
-public class NettyServer extends AbstractRpcServer {
+public class NettyServer implements RpcServer{//extends AbstractRpcServer {
 
 
-    private final CommonSerializer serializer;
+    /*private final CommonSerializer serializer;
 
     public NettyServer(String host, int port) {
         this(host, port, 0);
@@ -80,9 +80,9 @@ public class NettyServer extends AbstractRpcServer {
     @Override
     public <T> void publishService(Object service, Class<T> serviceClass) throws RpcException {
 
-    }
+    }*/
 
-    /*private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
+    private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
     private final String host;
     private final int port;
 
@@ -140,7 +140,7 @@ public class NettyServer extends AbstractRpcServer {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-    }*/
+    }
 
     @Override
     public void start(int port) {
@@ -180,7 +180,7 @@ public class NettyServer extends AbstractRpcServer {
 
     //@Override
     public void setSerializer(CommonSerializer serializer) {
-        //this.serializer = serializer;
+        this.serializer = serializer;
     }
 
 }

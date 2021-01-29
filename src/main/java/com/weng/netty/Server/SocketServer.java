@@ -63,10 +63,7 @@ public class SocketServer implements RpcServer {
             start();
         }
 
-    @Override
-    public <T> void publishService(T service, String serviceName) {
 
-    }
 
     @Override
         public void start() {
