@@ -1,6 +1,6 @@
 package com.weng.netty.Client;
 
-import com.weng.netty.Server.RpcResponse;
+import com.weng.netty.Server.stage.RpcResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
@@ -22,7 +22,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<RpcResponse>
         try {
             //System.out.println("handler");
             logger.info(String.format("客户端接收到消息: %s", msg));
-            AttributeKey<RpcResponse> key = AttributeKey.valueOf("rpcResponse");
+            AttributeKey<RpcResponse> key = AttributeKey.valueOf("rpcResponse"+msg.getRequestId());
             ctx.channel().attr(key).set(msg);
             ctx.channel().close();
         } finally {

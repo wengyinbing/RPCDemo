@@ -3,8 +3,7 @@ package com.weng.netty.Server;
 import com.weng.netty.Client.RpcRequest;
 
 import com.weng.netty.Server.stage.ResponseCode;
-import com.weng.netty.Server.stage.RpcError;
-import com.weng.netty.Server.stage.RpcException;
+import com.weng.netty.Server.stage.RpcResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +22,12 @@ public class RequestHandler {
 
         private Socket socket;
         private Object service;
-    {
-        logger.info("RequestHandler");
-    }
+        private static final ServiceProvider serviceProvider;
+        static {
+            logger.info("RequestHandler");
+            serviceProvider = new ServiceProviderImpl();
+
+         }
         /*public RequestHandler(Socket socket, Object service) {
             this.socket = socket;
             this.service = service;
@@ -49,16 +51,17 @@ public class RequestHandler {
             }*/
 
 
-        public Object handle(RpcRequest rpcRequest, Object service) {
-
+        //public Object handle(RpcRequest rpcRequest, Object service) {
+        public Object handle(RpcRequest rpcRequest) {
             Object result = null;
+            Object service = serviceProvider.getServiceProvider(rpcRequest.getInterfaceName());
             try {
                 result = invokeTargetMethod(rpcRequest, service);
                 logger.info("服务:{} 成功调用方法:{}", rpcRequest.getInterfaceName(), rpcRequest.getMethodName());
             } catch (IllegalAccessException | InvocationTargetException e) {
                 logger.error("调用或发送时有错误发生：", e);
             }
-            System.out.println("输出结果：" + result);
+            //System.out.println("输出结果：" + result);
             return result;
         }
         private Object invokeTargetMethod(RpcRequest rpcRequest, Object service) throws IllegalAccessException, InvocationTargetException {
@@ -66,7 +69,8 @@ public class RequestHandler {
             try {
                 method = service.getClass().getMethod(rpcRequest.getMethodName(), rpcRequest.getParamTypes());
             } catch (NoSuchMethodException e) {
-                return RpcResponse.fail(ResponseCode.METHOD_NOT_FOUND);
+                return RpcResponse.fail(ResponseCode.METHOD_NOT_FOUND,rpcRequest.getRequestId());
+
             }
             return method.invoke(service, rpcRequest.getParameters());
         }

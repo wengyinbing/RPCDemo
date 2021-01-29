@@ -1,7 +1,7 @@
 package com.weng.netty.Server.netty_item;
 
 import com.weng.netty.Server.stage.RpcException;
-import com.weng.netty.Server.RpcResponse;
+import com.weng.netty.Server.stage.RpcResponse;
 import com.weng.netty.Server.stage.RpcError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

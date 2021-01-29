@@ -5,6 +5,7 @@ import com.weng.netty.Client.RpcClient;
 import com.weng.netty.Client.RpcClientProxy;
 import com.weng.netty.Server.file.HelloObject;
 import com.weng.netty.Server.file.HelloService;
+import com.weng.netty.Server.netty_item.ProtobufSerializer;
 
 
 /**
@@ -14,7 +15,9 @@ import com.weng.netty.Server.file.HelloService;
 public class NettyTestClient {
 
     public static void main(String[] args) {
-        RpcClient client = new NettyClient("127.0.0.1", 9999);
+        //RpcClient client = new NettyClient("127.0.0.1", 9999);
+        RpcClient client = new NettyClient();
+        ((NettyClient) client).setSerializer(new ProtobufSerializer());
         RpcClientProxy rpcClientProxy = new RpcClientProxy(client);
         HelloService helloService = rpcClientProxy.getProxy(HelloService.class);
         HelloObject object = new HelloObject(12, "This is a message");
